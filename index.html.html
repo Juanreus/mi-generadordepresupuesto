@@ -1,0 +1,2217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generador de Presupuestos USD / ARS • Juan Reus</title>
+  <style>
+    :root {
+      --primary: #0f2942;
+      --primary-light: #1e4976;
+      --accent: #0d9488;
+      --accent-hover: #0f766e;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+      --border-light: #e2e8f0;
+      --success-bg: #ecfdf5;
+      --success-text: #065f46;
+      --warn-bg: #fffbeb;
+      --warn-text: #92400e;
+      --danger-bg: #fef2f2;
+      --danger-text: #991b1b;
+      --shadow: 0 4px 14px rgba(15, 41, 66, 0.07);
+      --radius: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      padding-bottom: 40px;
+    }
+
+    /* Top Bar */
+    .topbar {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: #fff;
+      padding: 14px 18px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .topbar-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .brand p {
+      font-size: 0.78rem;
+      color: #cbd5e1;
+    }
+
+    .topbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Navigation Tabs */
+    .nav-wrap {
+      max-width: 1280px;
+      margin: 14px auto 0;
+      padding: 0 14px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: var(--card);
+      padding: 6px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 10px 8px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .tab-btn:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1280px;
+      margin: 14px auto 0;
+      padding: 0 14px;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* Buttons */
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 7px;
+      padding: 8px 13px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-navy {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-navy:hover {
+      background: var(--primary-light);
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg);
+    }
+
+    .btn-light {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-light:hover {
+      background: rgba(255, 255, 255, 0.24);
+    }
+
+    .btn-danger {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: #fecaca;
+    }
+
+    .btn-danger:hover {
+      background: #fee2e2;
+    }
+
+    .btn-sm {
+      padding: 5px 9px;
+      font-size: 0.78rem;
+    }
+
+    /* Form Controls */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: var(--text);
+      background: #fff;
+      font-family: inherit;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.14);
+    }
+
+    /* KPI Summary Strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .kpi-box {
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 11px 12px;
+    }
+
+    .kpi-box.highlight {
+      background: var(--success-bg);
+      border-color: #a7f3d0;
+    }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .kpi-value {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 2px;
+    }
+
+    .kpi-box.highlight .kpi-value {
+      color: var(--success-text);
+    }
+
+    /* Items Table & Mobile Cards */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+
+    th {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      text-align: left;
+      padding: 9px 8px;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 7px 6px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: middle;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    td input,
+    td select {
+      width: 100%;
+      padding: 6px 7px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 0.84rem;
+      background: #fff;
+    }
+
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .calc-cell {
+      font-weight: 600;
+      color: var(--primary);
+      background: #f1f5f9;
+      border-radius: 5px;
+      padding: 6px 8px;
+      display: block;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mobile-items {
+      display: none;
+    }
+
+    .item-card {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #f8fafc;
+    }
+
+    .item-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 0.85rem;
+    }
+
+    .item-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .item-card-summary {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    /* Presupuesto / Quote Sheet Styling */
+    .quote-sheet {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .quote-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .quote-company h2 {
+      font-size: 1.3rem;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+    }
+
+    .quote-company .tagline {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    .quote-company .contact-edit {
+      margin-top: 5px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .quote-meta-box {
+      text-align: right;
+      min-width: 190px;
+    }
+
+    .quote-badge {
+      background: var(--primary);
+      color: #fff;
+      padding: 4px 11px;
+      border-radius: 5px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .quote-info-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--border-light);
+      border-radius: 7px;
+      padding: 9px 12px;
+      margin-bottom: 12px;
+      font-size: 0.82rem;
+    }
+
+    .quote-info-row {
+      margin-bottom: 2px;
+    }
+
+    .quote-totals {
+      width: 100%;
+      max-width: 340px;
+      margin-left: auto;
+      margin-top: 8px;
+      border-collapse: collapse;
+    }
+
+    .quote-totals td {
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--border-light);
+      font-size: 0.84rem;
+    }
+
+    .quote-total-final td {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.94rem;
+      padding: 7px 10px;
+    }
+
+    /* Condiciones Comerciales Comprimidas */
+    .quote-terms {
+      margin-top: 12px;
+      padding: 9px 11px;
+      background: #f8fafc;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      font-size: 0.78rem;
+      line-height: 1.3;
+    }
+
+    .quote-terms h4 {
+      color: var(--primary);
+      font-size: 0.78rem;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .term-row {
+      display: grid;
+      grid-template-columns: 112px 1fr;
+      gap: 6px;
+      margin-bottom: 3px;
+      align-items: center;
+    }
+
+    .term-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .term-row strong {
+      color: var(--text);
+      font-size: 0.77rem;
+    }
+
+    .term-row input {
+      width: 100%;
+      padding: 3px 6px;
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      font-size: 0.78rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .quote-sign {
+      margin-top: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .badge-pendiente {
+      background: var(--warn-bg);
+      color: var(--warn-text);
+    }
+
+    .badge-aprobado {
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .badge-rechazado {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+    }
+
+    /* Toast & Modal */
+    .toast {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      background: var(--primary);
+      color: #fff;
+      padding: 11px 16px;
+      border-radius: 8px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      z-index: 200;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 120;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: var(--radius);
+      max-width: 540px;
+      width: 100%;
+      padding: 18px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+      max-height: 88vh;
+      overflow-y: auto;
+    }
+
+    /* Responsive Rules */
+    @media (max-width: 820px) {
+      .grid-3,
+      .grid-2,
+      .kpi-grid,
+      .quote-info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .desktop-items {
+        display: none;
+      }
+
+      .mobile-items {
+        display: block;
+      }
+
+      .quote-top {
+        flex-direction: column;
+      }
+
+      .quote-meta-box {
+        text-align: left;
+      }
+
+      .term-row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+    }
+
+    /* Configuración exacta para impresión/exportación en 1 hoja A4 sin encabezados ni pies del navegador */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    @media print {
+      html, body {
+        width: 210mm;
+        background: #fff !important;
+        padding: 10mm 12mm !important;
+        margin: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .topbar,
+      .nav-wrap,
+      .no-print,
+      .toast,
+      .modal-backdrop {
+        display: none !important;
+      }
+
+      .container {
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+
+      #panel-presupuesto {
+        display: block !important;
+      }
+
+      .quote-sheet {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .quote-top {
+        padding-bottom: 8px !important;
+        margin-bottom: 8px !important;
+      }
+
+      .quote-company h2 {
+        font-size: 16pt !important;
+      }
+
+      .quote-company .tagline {
+        font-size: 9pt !important;
+      }
+
+      .quote-company .contact-edit {
+        font-size: 8pt !important;
+        margin-top: 3px !important;
+      }
+
+      .quote-company .contact-edit input {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        width: auto !important;
+        font-size: 8pt !important;
+        color: var(--muted) !important;
+      }
+
+      .quote-info-grid {
+        padding: 6px 10px !important;
+        margin-bottom: 8px !important;
+        font-size: 8.5pt !important;
+        grid-template-columns: 1.3fr 1fr !important;
+      }
+
+      .quote-sheet table th {
+        padding: 5px 6px !important;
+        font-size: 8pt !important;
+      }
+
+      .quote-sheet table td {
+        padding: 4px 6px !important;
+        font-size: 8.5pt !important;
+      }
+
+      .quote-totals {
+        margin-top: 6px !important;
+      }
+
+      .quote-totals td {
+        padding: 3px 6px !important;
+        font-size: 8.5pt !important;
+      }
+
+      .quote-total-final td {
+        padding: 5px 8px !important;
+        font-size: 9.5pt !important;
+      }
+
+      /* Ocultar datos de contacto y filas de condiciones comerciales dejadas vacías al imprimir */
+      .contact-seg.is-empty,
+      .term-row.is-empty {
+        display: none !important;
+      }
+
+      .quote-terms {
+        margin-top: 8px !important;
+        padding: 6px 8px !important;
+        font-size: 7.5pt !important;
+        line-height: 1.25 !important;
+      }
+
+      .quote-terms h4 {
+        font-size: 7.5pt !important;
+        margin-bottom: 3px !important;
+      }
+
+      .term-row {
+        grid-template-columns: 98px 1fr !important;
+        margin-bottom: 2px !important;
+        gap: 4px !important;
+      }
+
+      .term-row strong {
+        font-size: 7.5pt !important;
+      }
+
+      .term-row input {
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+        font-size: 7.5pt !important;
+      }
+
+      .quote-sign {
+        margin-top: 16px !important;
+        font-size: 7.8pt !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="topbar no-print">
+    <div class="topbar-inner">
+      <div class="brand">
+        <h1>PRESUPUESTOS USD / ARS • JUAN REUS</h1>
+        <p>Sistemas Electrónicos de Seguridad • CCTV • Redes &amp; Enlaces — San Juan, Argentina</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" id="btn-guardar-historial" onclick="guardarEnHistorial()">Guardar en Historial</button>
+        <button class="btn btn-light btn-sm" onclick="nuevoPresupuesto()">Nuevo</button>
+        <button class="btn btn-light btn-sm" onclick="openSyncModal()">Respaldo / Sincronizar</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-wrap no-print">
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-armador" onclick="switchTab('armador')">1. Armador de Costos</button>
+      <button class="tab-btn" id="tab-presupuesto" onclick="switchTab('presupuesto')">2. Presupuesto (PDF / WA)</button>
+      <button class="tab-btn" id="tab-catalogo" onclick="switchTab('catalogo')">3. Catálogo Maestro</button>
+      <button class="tab-btn" id="tab-historial" onclick="switchTab('historial')">4. Historial</button>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <!-- PANEL 1: ARMADOR DE COSTOS -->
+    <section class="panel active" id="panel-armador">
+      <div class="card">
+        <div id="editing-banner" style="display:none; background:var(--warn-bg); border:1px solid #fcd34d; color:var(--warn-text); padding:9px 12px; border-radius:7px; margin-bottom:12px; font-size:0.84rem; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <span>Editando presupuesto guardado: <strong id="editing-banner-num"></strong></span>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-primary btn-sm" onclick="guardarEnHistorial(true)">Actualizar en Historial</button>
+            <button class="btn btn-outline btn-sm" onclick="cancelarEdicionHistorial()">Salir de edición (Nuevo)</button>
+          </div>
+        </div>
+        <div class="card-header">
+          <div>
+            <div class="card-title">Parámetros de Cotización y Margen</div>
+            <div class="card-subtitle">Si cargás Costo en Pesos (ARS Dir.) y en USD, tiene prioridad el valor en Pesos.</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="openCatalogPicker()">+ Cargar desde Catálogo</button>
+        </div>
+
+        <div class="grid-3">
+          <div class="field">
+            <label for="cfg-dolar">Cotización Dólar ($ ARS / USD)</label>
+            <input type="number" id="cfg-dolar" step="0.01" oninput="recalcularTodo()" />
+          </div>
+          <div class="field">
+            <label for="cfg-margen">% Ganancia General por Defecto</label>
+            <input type="number" id="cfg-margen" step="0.1" oninput="aplicarMargenGeneral()" />
+          </div>
+          <div class="field">
+            <label for="cfg-redondeo">Redondeo Precio Unitario ($ ARS)</label>
+            <input type="number" id="cfg-redondeo" step="1" oninput="recalcularTodo()" />
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 12px;">
+          <div class="field">
+            <label for="meta-cliente">Cliente</label>
+            <input type="text" id="meta-cliente" placeholder="Nombre o empresa del cliente" oninput="recalcularTodo()" />
+          </div>
+          <div class="field">
+            <label for="meta-domicilio">Domicilio Obra</label>
+            <input type="text" id="meta-domicilio" placeholder="San Juan / Departamento" oninput="recalcularTodo()" />
+          </div>
+          <div class="field">
+            <label for="meta-contacto">Teléfono / Contacto</label>
+            <input type="text" id="meta-contacto" placeholder="Ej: 264-..." oninput="recalcularTodo()" />
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 12px;">
+          <div class="field">
+            <label for="meta-obra">Referencia / Obra</label>
+            <input type="text" id="meta-obra" placeholder="Ej: Sistema de Videovigilancia IP" oninput="recalcularTodo()" />
+          </div>
+          <div class="field">
+            <label for="meta-fecha">Fecha</label>
+            <input type="date" id="meta-fecha" oninput="recalcularTodo()" />
+          </div>
+          <div class="field">
+            <label for="meta-validez">Validez (días)</label>
+            <input type="number" id="meta-validez" min="0" step="1" oninput="recalcularTodo()" />
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div class="field">
+            <label for="meta-descuento">Descuento (%)</label>
+            <input type="number" id="meta-descuento" min="0" max="100" step="0.1" oninput="recalcularTodo()" />
+          </div>
+          <div class="field">
+            <label for="meta-iva">IVA / Recargo (%)</label>
+            <input type="number" id="meta-iva" min="0" max="100" step="0.1" oninput="recalcularTodo()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Detalle de Ítems -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Detalle de Equipos, Materiales y Servicios</div>
+            <div class="card-subtitle">Agregá filas libres o insertá ítems directamente desde tu catálogo.</div>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="openCatalogPicker()">+ Desde Catálogo</button>
+            <button class="btn btn-primary btn-sm" onclick="agregarFila()">+ Agregar Fila</button>
+          </div>
+        </div>
+
+        <!-- Vista Escritorio -->
+        <div class="table-wrap desktop-items">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:68px;">Cant.</th>
+                <th>Descripción de Equipos y Servicios</th>
+                <th style="width:105px;">Costo USD</th>
+                <th style="width:115px;">ARS Directo</th>
+                <th style="width:120px;">Costo Base</th>
+                <th style="width:85px;">% Gan.</th>
+                <th style="width:115px;">Ganancia</th>
+                <th style="width:120px;">P. Unit. ARS</th>
+                <th style="width:125px;">Subtotal</th>
+                <th style="width:44px;"></th>
+              </tr>
+            </thead>
+            <tbody id="items-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Vista Celular -->
+        <div class="mobile-items" id="items-mobile"></div>
+
+        <!-- Resumen Interno de Costos y Rentabilidad -->
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <div class="kpi-label">Costo Total Materiales / Serv.</div>
+            <div class="kpi-value" id="kpi-costo">$0</div>
+          </div>
+          <div class="kpi-box highlight">
+            <div class="kpi-label">Ganancia Bruta Estimada</div>
+            <div class="kpi-value" id="kpi-ganancia">$0</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Margen Real sobre Venta</div>
+            <div class="kpi-value" id="kpi-margen">0.0%</div>
+          </div>
+          <div class="kpi-box" style="background:#eff6ff; border-color:#bfdbfe;">
+            <div class="kpi-label">TOTAL FINAL AL CLIENTE</div>
+            <div class="kpi-value" id="kpi-total">$0</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end;">
+          <button class="btn btn-navy" onclick="switchTab('presupuesto')">Ver Presupuesto para Cliente →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 2: PRESUPUESTO CLIENTE (PDF / WHATSAPP) -->
+    <section class="panel" id="panel-presupuesto">
+      <div class="card no-print">
+        <div class="card-header" style="margin-bottom:0; padding-bottom:0; border-bottom:none;">
+          <div>
+            <div class="card-title">Vista Lista para Enviar al Cliente (Formato A4)</div>
+            <div class="card-subtitle">Tel/WhatsApp, Email y las condiciones que dejes en blanco se ocultan automáticamente al imprimir o guardar en PDF.</div>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="copiarWhatsApp()">Copiar para WhatsApp</button>
+            <button class="btn btn-navy" onclick="imprimirA4()">Imprimir / Guardar PDF (1 Hoja A4)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="quote-sheet" id="quote-sheet">
+        <div class="quote-top">
+          <div class="quote-company">
+            <h2>JUAN REUS</h2>
+            <div class="tagline">Sistemas Electrónicos de Seguridad • CCTV • Redes &amp; Enlaces</div>
+            <div class="contact-edit">
+              <span>San Juan, Argentina</span><span class="contact-seg" id="seg-empresa-tel"> | Tel / WhatsApp:
+              <input type="text" id="empresa-tel" placeholder="[Completar]" oninput="guardarDatosEmpresa()" style="width:130px; display:inline-block; padding:2px 6px; font-size:0.78rem;" /></span><span class="contact-seg" id="seg-empresa-email"> | Email:
+              <input type="text" id="empresa-email" placeholder="[Completar]" oninput="guardarDatosEmpresa()" style="width:165px; display:inline-block; padding:2px 6px; font-size:0.78rem;" /></span>
+            </div>
+          </div>
+          <div class="quote-meta-box">
+            <div class="quote-badge">PRESUPUESTO</div>
+            <div style="font-size:0.84rem;"><strong>N°:</strong> <span id="q-numero">0001-00000002</span></div>
+            <div style="font-size:0.8rem; color:var(--muted);"><strong>Moneda:</strong> ARS ($)</div>
+          </div>
+        </div>
+
+        <div class="quote-info-grid">
+          <div>
+            <div class="quote-info-row"><strong>Cliente:</strong> <span id="q-cliente">—</span></div>
+            <div class="quote-info-row"><strong>Domicilio Obra:</strong> <span id="q-domicilio">—</span></div>
+            <div class="quote-info-row"><strong>Teléfono / Contacto:</strong> <span id="q-contacto">—</span></div>
+            <div class="quote-info-row"><strong>Referencia / Obra:</strong> <span id="q-obra">—</span></div>
+          </div>
+          <div>
+            <div class="quote-info-row"><strong>Fecha:</strong> <span id="q-fecha">—</span></div>
+            <div class="quote-info-row"><strong>Validez (días):</strong> <span id="q-validez">—</span></div>
+            <div class="quote-info-row"><strong>Válido hasta:</strong> <span id="q-valido-hasta">—</span></div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:50px;">Ítem</th>
+                <th style="width:58px;">Cant.</th>
+                <th>Descripción de Equipos y Servicios</th>
+                <th style="width:120px; text-align:right;">Precio Unitario</th>
+                <th style="width:125px; text-align:right;">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody id="q-items-tbody"></tbody>
+          </table>
+        </div>
+
+        <table class="quote-totals">
+          <tr>
+            <td><strong>SUBTOTAL</strong></td>
+            <td class="num" id="q-subtotal">$0</td>
+          </tr>
+          <tr id="q-row-desc">
+            <td>Descuento (<span id="q-desc-pct">0</span>%)</td>
+            <td class="num" id="q-descuento">$0</td>
+          </tr>
+          <tr id="q-row-iva">
+            <td>IVA / Recargo (<span id="q-iva-pct">0</span>%)</td>
+            <td class="num" id="q-iva">$0</td>
+          </tr>
+          <tr class="quote-total-final">
+            <td>TOTAL PRESUPUESTADO</td>
+            <td class="num" id="q-total">$0</td>
+          </tr>
+        </table>
+
+        <div class="quote-terms" id="quote-terms-box">
+          <h4>Condiciones Comerciales y Alcance del Servicio</h4>
+          <div class="term-row" id="row-cond-pago">
+            <strong>Forma de pago:</strong>
+            <input type="text" id="cond-pago" placeholder="Vacío (no se imprime)" oninput="guardarCondiciones()" />
+          </div>
+          <div class="term-row" id="row-cond-plazo">
+            <strong>Plazo de entrega:</strong>
+            <input type="text" id="cond-plazo" placeholder="Vacío (no se imprime)" oninput="guardarCondiciones()" />
+          </div>
+          <div class="term-row" id="row-cond-garantia">
+            <strong>Garantía:</strong>
+            <input type="text" id="cond-garantia" placeholder="Vacío (no se imprime)" oninput="guardarCondiciones()" />
+          </div>
+          <div class="term-row" id="row-cond-noincluye">
+            <strong>No incluye:</strong>
+            <input type="text" id="cond-noincluye" placeholder="Vacío (no se imprime)" oninput="guardarCondiciones()" />
+          </div>
+          <div class="term-row" id="row-cond-obs">
+            <strong>Observaciones:</strong>
+            <input type="text" id="cond-obs" placeholder="Vacío (no se imprime)" oninput="guardarCondiciones()" />
+          </div>
+        </div>
+
+        <div class="quote-sign">
+          <div>Aceptación del Cliente (Firma y Aclaración): _______________________________________</div>
+          <div style="text-align:right; font-weight:600; color:var(--primary);">Juan Reus • Sistemas de Seguridad</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 3: CATÁLOGO MAESTRO -->
+    <section class="panel" id="panel-catalogo">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Agregar o Actualizar Ítem en Catálogo</div>
+            <div class="card-subtitle">Cargá precios de referencia en USD o en Pesos ARS.</div>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label for="cat-categoria">Categoría</label>
+            <input type="text" id="cat-categoria" list="cat-suggestions" placeholder="Ej: Cámaras IP, Enlaces, Servicios" />
+            <datalist id="cat-suggestions">
+              <option value="Cámaras IP"></option>
+              <option value="Enlaces"></option>
+              <option value="Networking"></option>
+              <option value="Grabación"></option>
+              <option value="Cableado"></option>
+              <option value="Accesorios"></option>
+              <option value="Servicios"></option>
+            </datalist>
+          </div>
+          <div class="field">
+            <label for="cat-desc">Descripción del Equipo o Servicio</label>
+            <input type="text" id="cat-desc" placeholder="Ej: Cámara Domo IP 4MP" />
+          </div>
+          <div class="field">
+            <label for="cat-notas">Notas / Código</label>
+            <input type="text" id="cat-notas" placeholder="Ej: Lente 2.8mm IR 30m" />
+          </div>
+        </div>
+        <div class="grid-3" style="margin-top: 12px; align-items: end;">
+          <div class="field">
+            <label for="cat-usd">Costo USD (u$s)</label>
+            <input type="number" id="cat-usd" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="field">
+            <label for="cat-ars">Costo ARS ($)</label>
+            <input type="number" id="cat-ars" step="1" placeholder="0" />
+          </div>
+          <div>
+            <button class="btn btn-primary" style="width:100%;" onclick="agregarAlCatalogo()">+ Guardar en Catálogo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Catálogo Maestro de Costos</div>
+            <div class="card-subtitle">Tocá "Usar" para agregar directo al presupuesto actual.</div>
+          </div>
+          <input type="text" id="cat-buscar" placeholder="Buscar equipo o categoría..." oninput="renderCatalogo()" style="max-width:260px; padding:7px 10px; border:1px solid var(--border); border-radius:6px;" />
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Categoría</th>
+                <th>Descripción</th>
+                <th class="num">Costo USD</th>
+                <th class="num">Costo ARS</th>
+                <th>Notas / Código</th>
+                <th style="width:125px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="catalogo-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 4: HISTORIAL DE PRESUPUESTOS -->
+    <section class="panel" id="panel-historial">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Registro y Seguimiento de Presupuestos Emitidos</div>
+            <div class="card-subtitle">Guardá cada presupuesto con su número correlativo, monto y estado, o editalo si surge alguna modificación.</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="guardarEnHistorial()">+ Guardar Presupuesto Actual</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>N° Presupuesto</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Obra / Referencia</th>
+                <th class="num">Monto Total</th>
+                <th>Estado</th>
+                <th>Observaciones</th>
+                <th style="width:135px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="historial-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal Selector de Catálogo -->
+  <div class="modal-backdrop" id="catalog-modal" onclick="closeModalOnBackdrop(event, 'catalog-modal')">
+    <div class="modal-box">
+      <div class="card-header">
+        <div class="card-title">Seleccionar del Catálogo</div>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('catalog-modal')">Cerrar</button>
+      </div>
+      <input type="text" id="picker-search" placeholder="Filtrar por nombre o categoría..." oninput="renderPickerList()" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px; margin-bottom:10px;" />
+      <div id="picker-list"></div>
+    </div>
+  </div>
+
+  <!-- Modal Respaldo / Sincronización -->
+  <div class="modal-backdrop" id="sync-modal" onclick="closeModalOnBackdrop(event, 'sync-modal')">
+    <div class="modal-box">
+      <div class="card-header">
+        <div class="card-title">Respaldo y Sincronización PC ↔ Celular</div>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('sync-modal')">Cerrar</button>
+      </div>
+      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:12px;">
+        Los cambios se guardan automáticamente en este navegador. Para pasar tu catálogo, historial y configuración entre PC y celular, exportá un archivo <strong>.json</strong> y abrilo en el otro dispositivo.
+      </p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn btn-primary" onclick="exportarJSON()">Descargar Respaldo (.json)</button>
+        <label class="btn btn-outline" style="cursor:pointer;">
+          Importar Respaldo (.json)
+          <input type="file" accept=".json,application/json" onchange="importarJSON(event)" style="display:none;" />
+        </label>
+        <button class="btn btn-danger btn-sm" onclick="restaurarDatosExcel()">Restaurar valores iniciales del Excel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "presupuestos_juan_reus_v1";
+
+    const DEFAULT_DATA = {
+      config: {
+        dolar: 1605,
+        margenPct: 20,
+        redondeo: 100,
+        empresaTel: "",
+        empresaEmail: ""
+      },
+      meta: {
+        cliente: "MDG",
+        domicilio: "San Juan",
+        contacto: "",
+        obra: "Sistema de Videovigilancia IP",
+        fecha: "2026-11-25",
+        validez: 3,
+        descuentoPct: 0,
+        ivaPct: 0
+      },
+      condiciones: {
+        pago: "",
+        plazo: "A convenir según disponibilidad de equipos y condiciones climáticas en obra.",
+        garantia: "",
+        noIncluye: "Obra civil (canalizaciones embutidas, rotura de mampostería), provisión de energía eléctrica 220V ni conexión a internet.",
+        obs: "Los precios están sujetos a variación según cotización del dólar oficial hasta el momento de aceptación del presupuesto."
+      },
+      items: [
+        {
+          id: 1,
+          cant: 1,
+          desc: "XVR DAHUA DH-XVR1B08H-I",
+          usd: 148,
+          arsDir: null,
+          margenPct: 20
+        }
+      ],
+      catalogo: [
+        { id: 1, cat: "Cámaras IP", desc: "Cámara IP Ezviz 3K con audio", usd: 57.05, ars: null, notas: "Exterior / Interior Wi-Fi o Cableada" },
+        { id: 2, cat: "Cámaras IP", desc: "Cámara Domo IP Hikvision 2MP PoE", usd: 48.0, ars: null, notas: "Lente 2.8mm IR 30m" },
+        { id: 3, cat: "Cámaras IP", desc: "Cámara Bullet IP Hikvision 4MP AcuSense", usd: 86.5, ars: null, notas: "Detección humanos/vehículos" },
+        { id: 4, cat: "Enlaces", desc: "Enlace inalámbrico Hikvision", usd: 128.2, ars: null, notas: "Kit punto a punto exterior" },
+        { id: 5, cat: "Enlaces", desc: "Enlace Punto a Punto TP-Link CPE510 (Par)", usd: 105.0, ars: null, notas: "5GHz 300Mbps exterior" },
+        { id: 6, cat: "Networking", desc: "Router PoE 8 canales Hikvision", usd: 62.95, ars: null, notas: "Switch/Router PoE 8 puertos" },
+        { id: 7, cat: "Networking", desc: "Router PoE 4 canales Hikvision", usd: 44.23, ars: null, notas: "Switch/Router PoE 4 puertos" },
+        { id: 8, cat: "Grabación", desc: "NVR Hikvision 8 canales 4K", usd: 92.0, ars: null, notas: "Sin disco rígido" },
+        { id: 9, cat: "Grabación", desc: "Disco Rígido WD Purple 1TB", usd: 59.0, ars: null, notas: "Especial videovigilancia 24/7" },
+        { id: 10, cat: "Cableado", desc: "Cable UTP x 100m", usd: null, ars: 28500, notas: "Bobina 100 metros (precio en pesos)" },
+        { id: 11, cat: "Cableado", desc: "Cable UTP Cat6 Exterior Cobre Puro x 305m", usd: 118.0, ars: null, notas: "Bobina doble vaina UV" },
+        { id: 12, cat: "Accesorios", desc: "Caja estanca IP65 100x100mm + conectores", usd: null, ars: 6500, notas: "Por punto de cámara" },
+        { id: 13, cat: "Servicios", desc: "Instalación, montaje y configuración por cámara", usd: null, ars: 25000, notas: "Mano de obra por boca" },
+        { id: 14, cat: "Servicios", desc: "Configuración de enlace inalámbrico y red", usd: null, ars: 35000, notas: "Alineación y puesta en marcha" },
+        { id: 15, cat: "Grabación", desc: "XVR DAHUA DH-XVR1B08H-I", usd: 148, ars: null, notas: "Sin disco rígido" }
+      ],
+      historial: [
+        {
+          numero: "0001-00000001",
+          fecha: "2026-11-17",
+          cliente: "Martin",
+          obra: "Sistema de Videovigilancia IP",
+          total: 285060,
+          estado: "Pendiente",
+          obs: "Enviado en PDF"
+        }
+      ]
+    };
+
+    let state = loadState();
+    let editingHistorialIndex = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          return {
+            ...DEFAULT_DATA,
+            ...parsed,
+            config: { ...DEFAULT_DATA.config, ...(parsed.config || {}) },
+            meta: { ...DEFAULT_DATA.meta, ...(parsed.meta || {}) },
+            condiciones: { ...DEFAULT_DATA.condiciones, ...(parsed.condiciones || {}) },
+            items: Array.isArray(parsed.items) ? parsed.items : DEFAULT_DATA.items,
+            catalogo: Array.isArray(parsed.catalogo) ? parsed.catalogo : DEFAULT_DATA.catalogo,
+            historial: Array.isArray(parsed.historial) ? parsed.historial : DEFAULT_DATA.historial
+          };
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      return JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 2400);
+    }
+
+    function formatARS(val) {
+      const n = Number(val) || 0;
+      return "$" + n.toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function formatDateAR(isoStr) {
+      if (!isoStr) return "—";
+      const parts = isoStr.split("-");
+      if (parts.length !== 3) return isoStr;
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    function calcValidoHasta(isoStr, days) {
+      if (!isoStr) return "—";
+      const d = new Date(isoStr + "T12:00:00");
+      if (isNaN(d.getTime())) return "—";
+      d.setDate(d.getDate() + (Number(days) || 0));
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function getCurrentBudgetNumber() {
+      if (editingHistorialIndex !== null && state.historial[editingHistorialIndex]) {
+        return state.historial[editingHistorialIndex].numero;
+      }
+      const nextNum = state.historial.length + 1;
+      return "0001-" + String(nextNum).padStart(8, "0");
+    }
+
+    function actualizarBannerEdicion() {
+      const banner = document.getElementById("editing-banner");
+      const btnTop = document.getElementById("btn-guardar-historial");
+      if (editingHistorialIndex !== null && state.historial[editingHistorialIndex]) {
+        banner.style.display = "flex";
+        document.getElementById("editing-banner-num").textContent = state.historial[editingHistorialIndex].numero;
+        if (btnTop) btnTop.textContent = "Guardar Cambios";
+      } else {
+        banner.style.display = "none";
+        if (btnTop) btnTop.textContent = "Guardar en Historial";
+      }
+    }
+
+    /* Replica exacta de las fórmulas del Excel */
+    function calcularItem(item) {
+      const cant = Number(item.cant) || 0;
+      const hasDesc = String(item.desc || "").trim() !== "";
+      const dolar = Number(state.config.dolar) || 0;
+      const redondeo = Number(state.config.redondeo) || 0;
+      const margenPct = item.margenPct !== null && item.margenPct !== undefined && item.margenPct !== ""
+        ? Number(item.margenPct)
+        : (Number(state.config.margenPct) || 0);
+
+      const hasArsDir = item.arsDir !== null && item.arsDir !== undefined && String(item.arsDir) !== "" && !isNaN(Number(item.arsDir));
+      const hasUsd = item.usd !== null && item.usd !== undefined && String(item.usd) !== "" && !isNaN(Number(item.usd));
+
+      let costoBase = 0;
+      if (hasDesc) {
+        if (hasArsDir) {
+          costoBase = Number(item.arsDir);
+        } else if (hasUsd) {
+          costoBase = Number(item.usd) * dolar;
+        }
+      }
+
+      const rawVenta = costoBase * (1 + margenPct / 100);
+      let precioUnit = 0;
+      if (hasDesc) {
+        precioUnit = redondeo > 0 ? Math.round(rawVenta / redondeo) * redondeo : rawVenta;
+      }
+
+      const gananciaUnit = hasDesc ? (precioUnit - costoBase) : 0;
+      const subtotal = hasDesc ? (cant * precioUnit) : 0;
+      const costoTotalLinea = hasDesc ? (cant * costoBase) : 0;
+
+      return {
+        cant,
+        costoBase,
+        margenPct,
+        gananciaUnit,
+        precioUnit,
+        subtotal,
+        costoTotalLinea
+      };
+    }
+
+    function calcularResumen() {
+      let costoTotal = 0;
+      let subtotalBruto = 0;
+
+      const calcRows = state.items.map((it) => {
+        const c = calcularItem(it);
+        costoTotal += c.costoTotalLinea;
+        subtotalBruto += c.subtotal;
+        return { item: it, calc: c };
+      });
+
+      const descPct = Number(state.meta.descuentoPct) || 0;
+      const ivaPct = Number(state.meta.ivaPct) || 0;
+
+      const descuentoMonto = -subtotalBruto * (descPct / 100);
+      const baseConDesc = subtotalBruto + descuentoMonto;
+      const ivaMonto = ivaPct > 0 ? baseConDesc * (ivaPct / 100) : 0;
+      const totalFinal = subtotalBruto + descuentoMonto + ivaMonto;
+
+      const gananciaBruta = subtotalBruto - costoTotal;
+      const margenRealPct = subtotalBruto > 0 ? (gananciaBruta / subtotalBruto) * 100 : 0;
+
+      return {
+        calcRows,
+        costoTotal,
+        subtotalBruto,
+        descuentoMonto,
+        ivaMonto,
+        totalFinal,
+        gananciaBruta,
+        margenRealPct
+      };
+    }
+
+    function syncInputsFromState() {
+      document.getElementById("cfg-dolar").value = state.config.dolar;
+      document.getElementById("cfg-margen").value = state.config.margenPct;
+      document.getElementById("cfg-redondeo").value = state.config.redondeo;
+
+      document.getElementById("meta-cliente").value = state.meta.cliente || "";
+      document.getElementById("meta-domicilio").value = state.meta.domicilio || "";
+      document.getElementById("meta-contacto").value = state.meta.contacto || "";
+      document.getElementById("meta-obra").value = state.meta.obra || "";
+      document.getElementById("meta-fecha").value = state.meta.fecha || "";
+      document.getElementById("meta-validez").value = state.meta.validez ?? 3;
+      document.getElementById("meta-descuento").value = state.meta.descuentoPct ?? 0;
+      document.getElementById("meta-iva").value = state.meta.ivaPct ?? 0;
+
+      document.getElementById("empresa-tel").value = state.config.empresaTel || "";
+      document.getElementById("empresa-email").value = state.config.empresaEmail || "";
+
+      document.getElementById("cond-pago").value = state.condiciones.pago || "";
+      document.getElementById("cond-plazo").value = state.condiciones.plazo || "";
+      document.getElementById("cond-garantia").value = state.condiciones.garantia || "";
+      document.getElementById("cond-noincluye").value = state.condiciones.noIncluye || "";
+      document.getElementById("cond-obs").value = state.condiciones.obs || "";
+      actualizarVisibilidadCondiciones();
+    }
+
+    function readInputsToState() {
+      state.config.dolar = parseFloat(document.getElementById("cfg-dolar").value) || 0;
+      state.config.margenPct = parseFloat(document.getElementById("cfg-margen").value) || 0;
+      state.config.redondeo = parseFloat(document.getElementById("cfg-redondeo").value) || 0;
+
+      state.meta.cliente = document.getElementById("meta-cliente").value;
+      state.meta.domicilio = document.getElementById("meta-domicilio").value;
+      state.meta.contacto = document.getElementById("meta-contacto").value;
+      state.meta.obra = document.getElementById("meta-obra").value;
+      state.meta.fecha = document.getElementById("meta-fecha").value;
+      state.meta.validez = parseFloat(document.getElementById("meta-validez").value) || 0;
+      state.meta.descuentoPct = parseFloat(document.getElementById("meta-descuento").value) || 0;
+      state.meta.ivaPct = parseFloat(document.getElementById("meta-iva").value) || 0;
+    }
+
+    function actualizarVisibilidadContacto() {
+      const telVal = (document.getElementById("empresa-tel").value || "").trim();
+      const emailVal = (document.getElementById("empresa-email").value || "").trim();
+      document.getElementById("seg-empresa-tel").classList.toggle("is-empty", telVal === "");
+      document.getElementById("seg-empresa-email").classList.toggle("is-empty", emailVal === "");
+    }
+
+    function guardarDatosEmpresa() {
+      state.config.empresaTel = document.getElementById("empresa-tel").value;
+      state.config.empresaEmail = document.getElementById("empresa-email").value;
+      actualizarVisibilidadContacto();
+      saveState();
+    }
+
+    function actualizarVisibilidadCondiciones() {
+      actualizarVisibilidadContacto();
+      const pairs = [
+        ["cond-pago", "row-cond-pago"],
+        ["cond-plazo", "row-cond-plazo"],
+        ["cond-garantia", "row-cond-garantia"],
+        ["cond-noincluye", "row-cond-noincluye"],
+        ["cond-obs", "row-cond-obs"]
+      ];
+      let anyVisible = false;
+      pairs.forEach(([inputId, rowId]) => {
+        const val = (document.getElementById(inputId).value || "").trim();
+        const row = document.getElementById(rowId);
+        if (val === "") {
+          row.classList.add("is-empty");
+        } else {
+          row.classList.remove("is-empty");
+          anyVisible = true;
+        }
+      });
+      const box = document.getElementById("quote-terms-box");
+      if (!anyVisible) {
+        box.classList.add("is-empty");
+      } else {
+        box.classList.remove("is-empty");
+      }
+    }
+
+    function guardarCondiciones() {
+      state.condiciones.pago = document.getElementById("cond-pago").value;
+      state.condiciones.plazo = document.getElementById("cond-plazo").value;
+      state.condiciones.garantia = document.getElementById("cond-garantia").value;
+      state.condiciones.noIncluye = document.getElementById("cond-noincluye").value;
+      state.condiciones.obs = document.getElementById("cond-obs").value;
+      actualizarVisibilidadCondiciones();
+      saveState();
+    }
+
+    function imprimirA4() {
+      actualizarVisibilidadCondiciones();
+      const origTitle = document.title;
+      document.title = "";
+      window.print();
+      setTimeout(() => { document.title = origTitle; }, 500);
+    }
+
+    function renderItems() {
+      const tbody = document.getElementById("items-tbody");
+      const mobileWrap = document.getElementById("items-mobile");
+      const res = calcularResumen();
+
+      tbody.innerHTML = "";
+      mobileWrap.innerHTML = "";
+
+      res.calcRows.forEach(({ item, calc }, idx) => {
+        const usdVal = item.usd !== null && item.usd !== undefined ? item.usd : "";
+        const arsVal = item.arsDir !== null && item.arsDir !== undefined ? item.arsDir : "";
+
+        // Desktop Row
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input type="number" min="0" step="1" value="${item.cant ?? 1}" onchange="updateItem(${idx}, 'cant', this.value)" /></td>
+          <td><input type="text" value="${escapeHtml(item.desc || "")}" placeholder="Descripción del equipo o servicio" oninput="updateItem(${idx}, 'desc', this.value, false)" onchange="renderAll()" /></td>
+          <td><input type="number" step="0.01" value="${usdVal}" placeholder="—" onchange="updateItem(${idx}, 'usd', this.value)" /></td>
+          <td><input type="number" step="1" value="${arsVal}" placeholder="—" onchange="updateItem(${idx}, 'arsDir', this.value)" /></td>
+          <td><span class="calc-cell">${formatARS(calc.costoBase)}</span></td>
+          <td><input type="number" step="0.1" value="${calc.margenPct}" onchange="updateItem(${idx}, 'margenPct', this.value)" /></td>
+          <td><span class="calc-cell">${formatARS(calc.gananciaUnit)}</span></td>
+          <td><span class="calc-cell">${formatARS(calc.precioUnit)}</span></td>
+          <td><span class="calc-cell">${formatARS(calc.subtotal)}</span></td>
+          <td><button class="btn btn-danger btn-sm" title="Eliminar fila" onclick="eliminarFila(${idx})">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+
+        // Mobile Card
+        const card = document.createElement("div");
+        card.className = "item-card";
+        card.innerHTML = `
+          <div class="item-card-top">
+            <span>Ítem #${idx + 1}</span>
+            <button class="btn btn-danger btn-sm" onclick="eliminarFila(${idx})">Eliminar</button>
+          </div>
+          <div class="field" style="margin-bottom:8px;">
+            <label>Descripción</label>
+            <input type="text" value="${escapeHtml(item.desc || "")}" placeholder="Equipo o servicio" onchange="updateItem(${idx}, 'desc', this.value)" />
+          </div>
+          <div class="item-card-grid">
+            <div class="field">
+              <label>Cantidad</label>
+              <input type="number" min="0" step="1" value="${item.cant ?? 1}" onchange="updateItem(${idx}, 'cant', this.value)" />
+            </div>
+            <div class="field">
+              <label>% Ganancia</label>
+              <input type="number" step="0.1" value="${calc.margenPct}" onchange="updateItem(${idx}, 'margenPct', this.value)" />
+            </div>
+            <div class="field">
+              <label>Costo USD</label>
+              <input type="number" step="0.01" value="${usdVal}" placeholder="—" onchange="updateItem(${idx}, 'usd', this.value)" />
+            </div>
+            <div class="field">
+              <label>ARS Directo</label>
+              <input type="number" step="1" value="${arsVal}" placeholder="—" onchange="updateItem(${idx}, 'arsDir', this.value)" />
+            </div>
+          </div>
+          <div class="item-card-summary">
+            <span>Base: ${formatARS(calc.costoBase)}</span>
+            <span>Unit: ${formatARS(calc.precioUnit)}</span>
+            <span>Sub: ${formatARS(calc.subtotal)}</span>
+          </div>
+        `;
+        mobileWrap.appendChild(card);
+      });
+
+      document.getElementById("kpi-costo").textContent = formatARS(res.costoTotal);
+      document.getElementById("kpi-ganancia").textContent = formatARS(res.gananciaBruta);
+      document.getElementById("kpi-margen").textContent = res.margenRealPct.toFixed(1) + "%";
+      document.getElementById("kpi-total").textContent = formatARS(res.totalFinal);
+    }
+
+    function renderPresupuesto() {
+      const res = calcularResumen();
+      document.getElementById("q-numero").textContent = getCurrentBudgetNumber();
+      document.getElementById("q-cliente").textContent = state.meta.cliente || "—";
+      document.getElementById("q-domicilio").textContent = state.meta.domicilio || "—";
+      document.getElementById("q-contacto").textContent = state.meta.contacto || "—";
+      document.getElementById("q-obra").textContent = state.meta.obra || "—";
+      document.getElementById("q-fecha").textContent = formatDateAR(state.meta.fecha);
+      document.getElementById("q-validez").textContent = (state.meta.validez ?? 0) + " días";
+      document.getElementById("q-valido-hasta").textContent = calcValidoHasta(state.meta.fecha, state.meta.validez);
+
+      const qTbody = document.getElementById("q-items-tbody");
+      qTbody.innerHTML = "";
+
+      let itemIdx = 0;
+      res.calcRows.forEach(({ item, calc }) => {
+        if (String(item.desc || "").trim() === "") return;
+        itemIdx++;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${itemIdx}</td>
+          <td>${calc.cant}</td>
+          <td>${escapeHtml(item.desc)}</td>
+          <td class="num">${formatARS(calc.precioUnit)}</td>
+          <td class="num"><strong>${formatARS(calc.subtotal)}</strong></td>
+        `;
+        qTbody.appendChild(tr);
+      });
+
+      if (itemIdx === 0) {
+        qTbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--muted); padding:14px;">No hay ítems cargados en el presupuesto.</td></tr>`;
+      }
+
+      document.getElementById("q-subtotal").textContent = formatARS(res.subtotalBruto);
+      document.getElementById("q-desc-pct").textContent = state.meta.descuentoPct || 0;
+      document.getElementById("q-descuento").textContent = formatARS(res.descuentoMonto);
+      document.getElementById("q-iva-pct").textContent = state.meta.ivaPct || 0;
+      document.getElementById("q-iva").textContent = formatARS(res.ivaMonto);
+      document.getElementById("q-total").textContent = formatARS(res.totalFinal);
+      actualizarVisibilidadCondiciones();
+    }
+
+    function renderCatalogo() {
+      const q = (document.getElementById("cat-buscar")?.value || "").toLowerCase().trim();
+      const tbody = document.getElementById("catalogo-tbody");
+      tbody.innerHTML = "";
+
+      const filtered = state.catalogo.filter((c) => {
+        if (!q) return true;
+        return (
+          String(c.cat || "").toLowerCase().includes(q) ||
+          String(c.desc || "").toLowerCase().includes(q) ||
+          String(c.notas || "").toLowerCase().includes(q)
+        );
+      });
+
+      filtered.forEach((c) => {
+        const tr = document.createElement("tr");
+        const usdText = c.usd !== null && c.usd !== undefined && c.usd !== "" ? "USD " + Number(c.usd).toFixed(2) : "—";
+        const arsText = c.ars !== null && c.ars !== undefined && c.ars !== "" ? formatARS(c.ars) : "—";
+        tr.innerHTML = `
+          <td><span class="badge" style="background:#e2e8f0; color:#1e293b;">${escapeHtml(c.cat)}</span></td>
+          <td><strong>${escapeHtml(c.desc)}</strong></td>
+          <td class="num">${usdText}</td>
+          <td class="num">${arsText}</td>
+          <td style="color:var(--muted); font-size:0.8rem;">${escapeHtml(c.notas || "")}</td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="usarItemCatalogo(${c.id})">Usar</button>
+            <button class="btn btn-danger btn-sm" onclick="borrarItemCatalogo(${c.id})">✕</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderHistorial() {
+      const tbody = document.getElementById("historial-tbody");
+      tbody.innerHTML = "";
+
+      state.historial.forEach((h, idx) => {
+        const badgeClass =
+          h.estado === "Aprobado"
+            ? "badge-aprobado"
+            : h.estado === "Rechazado"
+            ? "badge-rechazado"
+            : "badge-pendiente";
+
+        const isEditingRow = editingHistorialIndex === idx;
+        const tr = document.createElement("tr");
+        if (isEditingRow) {
+          tr.style.background = "var(--warn-bg)";
+        }
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(h.numero)}</strong></td>
+          <td>${formatDateAR(h.fecha)}</td>
+          <td>${escapeHtml(h.cliente)}</td>
+          <td>${escapeHtml(h.obra)}</td>
+          <td class="num"><strong>${formatARS(h.total)}</strong></td>
+          <td>
+            <select onchange="cambiarEstadoHistorial(${idx}, this.value)" class="badge ${badgeClass}" style="border:none; cursor:pointer;">
+              <option value="Pendiente" ${h.estado === "Pendiente" ? "selected" : ""}>Pendiente</option>
+              <option value="Aprobado" ${h.estado === "Aprobado" ? "selected" : ""}>Aprobado</option>
+              <option value="Rechazado" ${h.estado === "Rechazado" ? "selected" : ""}>Rechazado</option>
+            </select>
+          </td>
+          <td><input type="text" value="${escapeHtml(h.obs || "")}" onchange="cambiarObsHistorial(${idx}, this.value)" /></td>
+          <td style="white-space:nowrap;">
+            <button class="btn btn-outline btn-sm" title="Editar presupuesto" onclick="editarHistorial(${idx})">Editar</button>
+            <button class="btn btn-danger btn-sm" title="Eliminar" onclick="borrarHistorial(${idx})">✕</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderAll() {
+      renderItems();
+      renderPresupuesto();
+      renderCatalogo();
+      renderHistorial();
+      saveState();
+    }
+
+    function recalcularTodo() {
+      readInputsToState();
+      renderItems();
+      renderPresupuesto();
+      saveState();
+    }
+
+    function aplicarMargenGeneral() {
+      readInputsToState();
+      state.items.forEach((it) => {
+        it.margenPct = state.config.margenPct;
+      });
+      renderAll();
+    }
+
+    function updateItem(idx, field, val, shouldRender = true) {
+      const item = state.items[idx];
+      if (!item) return;
+
+      if (field === "desc") {
+        item.desc = val;
+      } else if (field === "cant") {
+        item.cant = val === "" ? 0 : parseFloat(val);
+      } else if (field === "usd") {
+        item.usd = val === "" ? null : parseFloat(val);
+      } else if (field === "arsDir") {
+        item.arsDir = val === "" ? null : parseFloat(val);
+      } else if (field === "margenPct") {
+        item.margenPct = val === "" ? 0 : parseFloat(val);
+      }
+
+      if (shouldRender) {
+        renderItems();
+        renderPresupuesto();
+      }
+      saveState();
+    }
+
+    function agregarFila() {
+      state.items.push({
+        id: Date.now(),
+        cant: 1,
+        desc: "",
+        usd: null,
+        arsDir: null,
+        margenPct: state.config.margenPct
+      });
+      renderAll();
+    }
+
+    function eliminarFila(idx) {
+      state.items.splice(idx, 1);
+      if (state.items.length === 0) {
+        agregarFila();
+      } else {
+        renderAll();
+      }
+    }
+
+    function openCatalogPicker() {
+      document.getElementById("picker-search").value = "";
+      renderPickerList();
+      document.getElementById("catalog-modal").classList.add("open");
+    }
+
+    function renderPickerList() {
+      const q = (document.getElementById("picker-search").value || "").toLowerCase().trim();
+      const wrap = document.getElementById("picker-list");
+      wrap.innerHTML = "";
+
+      state.catalogo
+        .filter((c) => !q || c.desc.toLowerCase().includes(q) || c.cat.toLowerCase().includes(q))
+        .forEach((c) => {
+          const div = document.createElement("div");
+          div.style.cssText = "display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 6px; border-bottom:1px solid var(--border-light);";
+          const priceLabel = c.ars ? formatARS(c.ars) + " ARS" : c.usd ? "USD " + c.usd : "Sin costo";
+          div.innerHTML = `
+            <div>
+              <div style="font-weight:700; font-size:0.88rem;">${escapeHtml(c.desc)}</div>
+              <div style="font-size:0.78rem; color:var(--muted);">${escapeHtml(c.cat)} • ${priceLabel}</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="usarItemCatalogo(${c.id}, true)">Agregar</button>
+          `;
+          wrap.appendChild(div);
+        });
+    }
+
+    function usarItemCatalogo(id, closeModalAfter = false) {
+      const catItem = state.catalogo.find((x) => x.id === id);
+      if (!catItem) return;
+
+      const last = state.items[state.items.length - 1];
+      const target = last && (!last.desc || last.desc.trim() === "") ? last : null;
+
+      const newObj = {
+        id: Date.now() + Math.random(),
+        cant: 1,
+        desc: catItem.desc,
+        usd: catItem.usd ?? null,
+        arsDir: catItem.ars ?? null,
+        margenPct: state.config.margenPct
+      };
+
+      if (target) {
+        Object.assign(target, newObj);
+      } else {
+        state.items.push(newObj);
+      }
+
+      renderAll();
+      showToast("Agregado: " + catItem.desc);
+      if (closeModalAfter) closeModal("catalog-modal");
+    }
+
+    function agregarAlCatalogo() {
+      const cat = document.getElementById("cat-categoria").value.trim() || "General";
+      const desc = document.getElementById("cat-desc").value.trim();
+      const notas = document.getElementById("cat-notas").value.trim();
+      const usdRaw = document.getElementById("cat-usd").value;
+      const arsRaw = document.getElementById("cat-ars").value;
+
+      if (!desc) {
+        showToast("Ingresá una descripción para el ítem");
+        return;
+      }
+
+      state.catalogo.push({
+        id: Date.now(),
+        cat,
+        desc,
+        usd: usdRaw !== "" ? parseFloat(usdRaw) : null,
+        ars: arsRaw !== "" ? parseFloat(arsRaw) : null,
+        notas
+      });
+
+      document.getElementById("cat-desc").value = "";
+      document.getElementById("cat-notas").value = "";
+      document.getElementById("cat-usd").value = "";
+      document.getElementById("cat-ars").value = "";
+
+      renderCatalogo();
+      saveState();
+      showToast("Ítem guardado en el catálogo");
+    }
+
+    function borrarItemCatalogo(id) {
+      state.catalogo = state.catalogo.filter((x) => x.id !== id);
+      renderCatalogo();
+      saveState();
+    }
+
+    function crearSnapshotPresupuesto() {
+      return {
+        config: {
+          dolar: state.config.dolar,
+          margenPct: state.config.margenPct,
+          redondeo: state.config.redondeo
+        },
+        meta: JSON.parse(JSON.stringify(state.meta)),
+        condiciones: JSON.parse(JSON.stringify(state.condiciones)),
+        items: JSON.parse(JSON.stringify(state.items))
+      };
+    }
+
+    function guardarEnHistorial(forceUpdate = false) {
+      readInputsToState();
+      const res = calcularResumen();
+      const snapshot = crearSnapshotPresupuesto();
+
+      if (editingHistorialIndex !== null && state.historial[editingHistorialIndex]) {
+        const existing = state.historial[editingHistorialIndex];
+        state.historial[editingHistorialIndex] = {
+          ...existing,
+          fecha: state.meta.fecha || existing.fecha,
+          cliente: state.meta.cliente || "Sin especificar",
+          obra: state.meta.obra || "Presupuesto general",
+          total: res.totalFinal,
+          snapshot
+        };
+        renderHistorial();
+        renderPresupuesto();
+        saveState();
+        showToast(`Presupuesto ${existing.numero} actualizado`);
+        return;
+      }
+
+      const numero = getCurrentBudgetNumber();
+      state.historial.push({
+        numero,
+        fecha: state.meta.fecha || new Date().toISOString().slice(0, 10),
+        cliente: state.meta.cliente || "Sin especificar",
+        obra: state.meta.obra || "Presupuesto general",
+        total: res.totalFinal,
+        estado: "Pendiente",
+        obs: "Registrado desde web",
+        snapshot
+      });
+
+      editingHistorialIndex = state.historial.length - 1;
+      actualizarBannerEdicion();
+      renderHistorial();
+      renderPresupuesto();
+      saveState();
+      showToast(`Guardado ${numero} en el historial`);
+    }
+
+    function editarHistorial(idx) {
+      const reg = state.historial[idx];
+      if (!reg) return;
+
+      editingHistorialIndex = idx;
+
+      if (reg.snapshot) {
+        if (reg.snapshot.config) {
+          state.config.dolar = reg.snapshot.config.dolar ?? state.config.dolar;
+          state.config.margenPct = reg.snapshot.config.margenPct ?? state.config.margenPct;
+          state.config.redondeo = reg.snapshot.config.redondeo ?? state.config.redondeo;
+        }
+        if (reg.snapshot.meta) {
+          state.meta = { ...DEFAULT_DATA.meta, ...JSON.parse(JSON.stringify(reg.snapshot.meta)) };
+        }
+        if (reg.snapshot.condiciones) {
+          state.condiciones = { ...DEFAULT_DATA.condiciones, ...JSON.parse(JSON.stringify(reg.snapshot.condiciones)) };
+        }
+        if (Array.isArray(reg.snapshot.items) && reg.snapshot.items.length > 0) {
+          state.items = JSON.parse(JSON.stringify(reg.snapshot.items));
+        }
+      } else {
+        // Registros antiguos sin detalle completo guardado: carga cabecera y monto como ítem editable
+        state.meta = {
+          ...state.meta,
+          cliente: reg.cliente || "",
+          obra: reg.obra || "",
+          fecha: reg.fecha || state.meta.fecha,
+          descuentoPct: 0,
+          ivaPct: 0
+        };
+        state.items = [
+          {
+            id: Date.now(),
+            cant: 1,
+            desc: reg.obra || "Detalle del presupuesto",
+            usd: null,
+            arsDir: Number(reg.total) || 0,
+            margenPct: 0
+          }
+        ];
+      }
+
+      syncInputsFromState();
+      actualizarBannerEdicion();
+      renderAll();
+      switchTab("armador");
+      showToast(`Editando ${reg.numero}`);
+    }
+
+    function cancelarEdicionHistorial() {
+      editingHistorialIndex = null;
+      actualizarBannerEdicion();
+      nuevoPresupuesto();
+    }
+
+    function cambiarEstadoHistorial(idx, estado) {
+      state.historial[idx].estado = estado;
+      renderHistorial();
+      saveState();
+    }
+
+    function cambiarObsHistorial(idx, obs) {
+      state.historial[idx].obs = obs;
+      saveState();
+    }
+
+    function borrarHistorial(idx) {
+      state.historial.splice(idx, 1);
+      if (editingHistorialIndex === idx) {
+        editingHistorialIndex = null;
+        actualizarBannerEdicion();
+      } else if (editingHistorialIndex !== null && idx < editingHistorialIndex) {
+        editingHistorialIndex--;
+        actualizarBannerEdicion();
+      }
+      renderHistorial();
+      renderPresupuesto();
+      saveState();
+    }
+
+    function nuevoPresupuesto() {
+      editingHistorialIndex = null;
+      actualizarBannerEdicion();
+      const today = new Date().toISOString().slice(0, 10);
+      state.meta = {
+        cliente: "",
+        domicilio: "San Juan",
+        contacto: "",
+        obra: "",
+        fecha: today,
+        validez: 7,
+        descuentoPct: 0,
+        ivaPct: 0
+      };
+      state.items = [
+        {
+          id: Date.now(),
+          cant: 1,
+          desc: "",
+          usd: null,
+          arsDir: null,
+          margenPct: state.config.margenPct
+        }
+      ];
+      syncInputsFromState();
+      renderAll();
+      switchTab("armador");
+      showToast("Nuevo presupuesto listo");
+    }
+
+    function copiarWhatsApp() {
+      readInputsToState();
+      const res = calcularResumen();
+      const lines = [];
+      lines.push(`*PRESUPUESTO ${getCurrentBudgetNumber()}*`);
+      lines.push(`*Juan Reus* — Sistemas Electrónicos de Seguridad • CCTV • Redes & Enlaces`);
+      if (state.meta.cliente) lines.push(`*Cliente:* ${state.meta.cliente}`);
+      if (state.meta.obra) lines.push(`*Obra:* ${state.meta.obra}`);
+      lines.push(`*Fecha:* ${formatDateAR(state.meta.fecha)} | *Válido hasta:* ${calcValidoHasta(state.meta.fecha, state.meta.validez)}`);
+      lines.push(`--------------------------------`);
+
+      let count = 0;
+      res.calcRows.forEach(({ item, calc }) => {
+        if (String(item.desc || "").trim() === "") return;
+        count++;
+        lines.push(`${count}. ${calc.cant}x ${item.desc} — Unit: ${formatARS(calc.precioUnit)} | *Sub: ${formatARS(calc.subtotal)}*`);
+      });
+
+      lines.push(`--------------------------------`);
+      lines.push(`*Subtotal:* ${formatARS(res.subtotalBruto)}`);
+      if (res.descuentoMonto !== 0) lines.push(`*Descuento (${state.meta.descuentoPct}%):* ${formatARS(res.descuentoMonto)}`);
+      if (res.ivaMonto > 0) lines.push(`*IVA / Recargo (${state.meta.ivaPct}%):* ${formatARS(res.ivaMonto)}`);
+      lines.push(`*TOTAL PRESUPUESTADO: ${formatARS(res.totalFinal)}*`);
+
+      if (state.condiciones.pago.trim()) lines.push(`*Forma de pago:* ${state.condiciones.pago.trim()}`);
+      if (state.condiciones.plazo.trim()) lines.push(`*Plazo:* ${state.condiciones.plazo.trim()}`);
+      if (state.condiciones.garantia.trim()) lines.push(`*Garantía:* ${state.condiciones.garantia.trim()}`);
+      if (state.condiciones.noIncluye.trim()) lines.push(`*No incluye:* ${state.condiciones.noIncluye.trim()}`);
+      if (state.condiciones.obs.trim()) lines.push(`*Obs.:* ${state.condiciones.obs.trim()}`);
+
+      const text = lines.join("\n");
+      navigator.clipboard.writeText(text).then(
+        () => showToast("Resumen copiado para WhatsApp"),
+        () => {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          showToast("Resumen copiado para WhatsApp");
+        }
+      );
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+
+      document.getElementById("tab-" + tabName).classList.add("active");
+      document.getElementById("panel-" + tabName).classList.add("active");
+      renderPresupuesto();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function openSyncModal() {
+      document.getElementById("sync-modal").classList.add("open");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("open");
+    }
+
+    function closeModalOnBackdrop(e, id) {
+      if (e.target.id === id) closeModal(id);
+    }
+
+    function exportarJSON() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `respaldo_presupuestos_juan_reus_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Archivo de respaldo descargado");
+    }
+
+    function importarJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported && typeof imported === "object") {
+            state = {
+              ...DEFAULT_DATA,
+              ...imported,
+              config: { ...DEFAULT_DATA.config, ...(imported.config || {}) },
+              meta: { ...DEFAULT_DATA.meta, ...(imported.meta || {}) },
+              condiciones: { ...DEFAULT_DATA.condiciones, ...(imported.condiciones || {}) },
+              items: Array.isArray(imported.items) ? imported.items : DEFAULT_DATA.items,
+              catalogo: Array.isArray(imported.catalogo) ? imported.catalogo : DEFAULT_DATA.catalogo,
+              historial: Array.isArray(imported.historial) ? imported.historial : DEFAULT_DATA.historial
+            };
+            editingHistorialIndex = null;
+            actualizarBannerEdicion();
+            syncInputsFromState();
+            renderAll();
+            closeModal("sync-modal");
+            showToast("Respaldo importado con éxito");
+          }
+        } catch (err) {
+          showToast("Archivo JSON inválido");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function restaurarDatosExcel() {
+      state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      editingHistorialIndex = null;
+      actualizarBannerEdicion();
+      syncInputsFromState();
+      renderAll();
+      closeModal("sync-modal");
+      showToast("Datos iniciales del Excel restaurados");
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    // Inicialización
+    syncInputsFromState();
+    actualizarBannerEdicion();
+    renderAll();
+  </script>
+</body>
+</html>
